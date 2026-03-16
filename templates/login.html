@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePortal Login</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #020504;
+            color: #ecfdf5;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 10% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 90% 100%, rgba(5, 150, 105, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            background: rgba(10, 18, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 28px;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            color: #ecfdf5;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #869e94;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #10b981;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #060c0a;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 14px;
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+            background: #0a120f;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #020504;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .register {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: #869e94;
+        }
+
+        .register a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .register a:hover {
+            color: #34d399;
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .error-msg {
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        /* Loading state */
+        .btn.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="logo">
+            <div class="logo-icon">🔐</div>
+            SecurePortal
+        </div>
+        <div class="subtitle">Enter your credentials to continue</div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" name="username" id="username" required autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+
+            <button class="btn" type="submit" id="submitBtn">Sign In</button>
+        </form>
+
+        <div class="register">
+            Don't have an account?
+            <a href="/register">Register</a>
+        </div>
+    </div>
+
+    <script>
+        // Telemetry Collection
+        let mouseMoves = 0;
+        let keyPresses = 0;
+        let firstTypingTime = null;
+
+        document.addEventListener('mousemove', () => mouseMoves++);
+        document.addEventListener('keydown', () => {
+            keyPresses++;
+            if (!firstTypingTime) {
+                firstTypingTime = Date.now();
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Authenticating...';
+            errorMsg.style.display = 'none';
+
+            try {
+                // Step 1: Standard Authentication
+                const loginRes = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
+                });
+
+                let loginSuccess = true;
+                let loginErrorMessage = '';
+
+                if (!loginRes.ok) {
+                    const errorData = await loginRes.json();
+                    loginSuccess = false;
+                    loginErrorMessage = errorData.message || 'Invalid credentials';
+                    
+                    if (loginRes.status === 403) { // Custom Locked Status
+                        submitBtn.classList.remove('loading');
+                        submitBtn.textContent = 'Sign In';
+                        errorMsg.innerHTML = `<div style="font-size:1.5rem; margin-bottom:0.5rem;">🔒</div> <b>${loginErrorMessage}</b><br><span style="font-size:0.8rem; margin-top:0.5rem; display:block; opacity:0.8;">Your account is temporarily frozen for 24 hours to prevent unauthorized access.</span>`;
+                        errorMsg.style.display = 'block';
+                        errorMsg.style.background = 'rgba(239, 68, 68, 0.15)';
+                        errorMsg.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        errorMsg.style.color = '#f87171';
+                        errorMsg.style.padding = '20px';
+                        return; // Stop here for locked accounts
+                    }
+                }
+
+                // Step 2: Fraud Telemetry Check
+                submitBtn.textContent = 'Verifying Security...';
+
+                // Calculate actual typing speed (cpm)
+                let typingCpm = 0;
+                if (firstTypingTime && keyPresses > 0) {
+                    const timeDiffMinutes = (Date.now() - firstTypingTime) / 60000;
+                    // Avoid division by zero if submitted instantly
+                    typingCpm = timeDiffMinutes > 0 ? Math.round(keyPresses / timeDiffMinutes) : keyPresses * 60;
+                }
+
+                const envData = {
+                    typing_speed: typingCpm,
+                    mouse_moves: mouseMoves,
+                    user_agent: navigator.userAgent
+                };
+
+                const behaviorRes = await fetch('/behavior', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(envData)
+                });
+
+                const behaviorData = await behaviorRes.json();
+
+                if (behaviorData.status === 'blocked') {
+                    throw new Error(`Login blocked due to suspicious activity. Risk Score: ${behaviorData.risk}%`);
+                } else if (behaviorData.status === 'mfa_required') {
+                    submitBtn.textContent = 'Session Suspended...';
+
+                    errorMsg.textContent = `Unusual activity detected. Session suspended. Redirecting to Identity Verification...`;
+                    errorMsg.style.display = 'block';
+                    errorMsg.style.background = 'rgba(251, 146, 60, 0.1)';
+                    errorMsg.style.borderColor = 'rgba(251, 146, 60, 0.2)';
+                    errorMsg.style.color = '#fb923c';
+
+                    setTimeout(() => {
+                        window.location.href = '/mfa';
+                    }, 3000);
+                } else {
+                    if (!loginSuccess) {
+                        throw new Error(loginErrorMessage);
+                    }
+                    // Allowed
+                    window.location.href = '/dashboard';
+                }
+
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Sign In';
+            }
+        });
+    </script>
+</body>
+
+</html>

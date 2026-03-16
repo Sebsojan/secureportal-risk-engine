@@ -1,0 +1,28 @@
+# Use an official Python runtime as a parent image
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the requirements file into the container
+COPY requirements_ml.txt ./
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements_ml.txt
+
+# Copy the ml_service code and the initial training data/db into the container
+# For production, we would use an RDS database instead of sqlite, but we include it for testing
+COPY ml_service.py ./
+COPY api_db.db ./
+COPY training_data.csv ./
+
+# Make port 6000 available to the world outside this container
+EXPOSE 6000
+
+# Define environment variable for production readiness
+ENV FLASK_APP=ml_service.py
+ENV FLASK_ENV=production
+
+# Run gunicorn or flask (gunicorn recommended for prod)
+# Falling back to flask run for simplicity on AWS Free Tier initially
+CMD ["python", "ml_service.py"]

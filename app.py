@@ -397,7 +397,7 @@ def behavior():
 
         # Call the standalone Risk API
         ml_response = requests.post(
-            "http://127.0.0.1:5001/evaluate",
+            "http://184.73.70.95:5000/evaluate",
             json=api_payload,
             headers=headers,
             timeout=3
